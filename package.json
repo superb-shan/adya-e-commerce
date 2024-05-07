@@ -1,5 +1,5 @@
 {
-  "name": "template-cra-express",
+  "name": "adya-e-commerce",
   "version": "1.0.0",
   "description": "",
   "main": "",
@@ -11,6 +11,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "concurrently": "^8.2.2"
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "concurrently": "^8.2.2",
+    "lucide-react": "^0.378.0",
+    "tailwind-merge": "^2.3.0",
+    "tailwindcss-animate": "^1.0.7"
   }
 }
