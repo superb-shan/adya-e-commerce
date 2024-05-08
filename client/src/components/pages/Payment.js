@@ -175,11 +175,9 @@ const Payment = () => {
                         <span className="text-2xl font-bold">${billing.total}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                        <Link to="/">
-                            <Button className="text-primary hover:bg-primary/10 focus:ring-primary" variant="outline">
-                                Continue Shopping
-                            </Button>
-                        </Link>
+                        <Button className="text-primary hover:bg-primary/10 focus:ring-primary" variant="outline">
+                            Continue Shopping
+                        </Button>
                         <Button className="bg-primary text-white hover:bg-primary/90 focus:ring-primary" onClick={() => handlePlaceOrder()}>
                         Place Order
                         </Button>
