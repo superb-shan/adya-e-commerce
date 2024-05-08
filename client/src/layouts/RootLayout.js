@@ -8,7 +8,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
   } from "../components/ui/dropdown-menu"
-  import { AvatarImage, AvatarFallback, Avatar } from "../components/ui/avatar"
 import { Button } from "../components/ui/button";
 import { setAuth } from "../slices/userSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,6 +15,7 @@ import { useEffect } from "react";
 import axios from "axios";
 import { setInitialData } from "../slices/exploreSlice";
 import { addMultipleToCart } from "../slices/cartSlice";
+import { setBilling, setSubtotal } from "../slices/billingSlice";
 
 const fetchProducts = async () => {
     try {
@@ -49,9 +49,36 @@ export default function RootLayout() {
         }
     }
 
+    const fetchBillingDetails = async () => {
+        try {
+          console.log("fetching Billing Data");
+          const response = await axios.get('/cart/billing', {
+            headers: {
+              Authorization: `Bearer ${user.token}`
+            }
+          }
+          );
+          return response.data;
+        } catch (error) {
+          throw new Error('Failed to fetch data');
+        }
+    }
+
     useEffect(() => {
         fetchProducts().then(data => {console.log(data); dispatch(setInitialData(data))});
       }, []);
+
+    useEffect(() => {
+        if(user){
+            fetchBillingDetails().then(data => {console.log("billing data", data); dispatch(setBilling(data))});
+        }
+    }, [user]);
+
+    useEffect(() => {
+        if(user){
+            dispatch(setSubtotal(cartItems.reduce((acc, item) => acc + item.product.price, 0)));
+        }
+    }, [cartItems]);
 
     useEffect(() => {
         if(user){
@@ -86,7 +113,7 @@ export default function RootLayout() {
                 <Link className="relative" to={"/cart"}>
                     <ShoppingCartIcon className="h-6 w-6" />
                     {
-                    cartItems.length > 0 && <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs">{cartItems.length}</span>
+                        (user && cartItems.length > 0) && <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs">{cartItems.length}</span>
                     }
                 </Link>
                 {
@@ -102,7 +129,7 @@ export default function RootLayout() {
                             <DropdownMenuLabel>Account</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem>
-                                <button onClick={() => handleLogout()}>
+                                <button onClick={() => handleLogout()} className="w-full h-full text-left">
                                     Logout
                                 </button>
                             </DropdownMenuItem>

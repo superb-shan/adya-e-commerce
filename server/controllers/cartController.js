@@ -42,6 +42,7 @@ const getCartItems = async (req, res) => {
 // delete a cart item
 const deleteCartItem = async (req, res) => {
     const { id } = req.params;
+    console.log("inside single delete")
     try {
         const cartItem = await Cart.findByIdAndDelete(id);
         if (!cartItem) {
@@ -57,9 +58,24 @@ const deleteCartItem = async (req, res) => {
 const deleteAndPutCartItems = async (req, res) => {
     const cartItems = req.body;
     try {
-        await Cart.deleteMany({});
+        await Cart.deleteMany({
+            user_id: req.user._id
+        });
         const newCartItems = await Cart.insertMany(cartItems);
         res.json(newCartItems);
+    } catch (error) {
+        res.status(500).json({ error });
+    }
+};
+
+//delete all cart items
+const deleteAllCartItems = async (req, res) => {
+    console.log("inside multi delete")
+    try {
+        await Cart.deleteMany({
+            user_id: req.user._id
+        });
+        res.json({ message: 'All cart items deleted' });
     } catch (error) {
         res.status(500).json({ error });
     }
@@ -78,13 +94,12 @@ const getBillingDetails = async (req, res) => {
                 .findById(item.product_id);
             subPrice += product.price * item.quantity;
         }
-
         //determine a random shipping amount
         const shippingPrice = Math.floor(Math.random() * 100);
+        
+        const totalPrice = subPrice + shippingPrice;
 
-        const totalPrice = subPrice + shipping;
-
-        res.json({ subPrice, shippingPrice, totalPrice });
+        res.json({ subPrice, shippingPrice: subPrice === 0 ? 0: shippingPrice, totalPrice });
     } catch (error) {
         res.status(500).json({ error });
     }
@@ -95,5 +110,6 @@ module.exports = {
     getCartItems,
     deleteCartItem,
     deleteAndPutCartItems,
-    getBillingDetails
+    getBillingDetails,
+    deleteAllCartItems
 };

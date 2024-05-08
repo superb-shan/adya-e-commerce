@@ -1,20 +1,54 @@
 import React, { useEffect, useState } from 'react'
 import { Button } from '../ui/button';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { FrownIcon } from 'lucide-react';
+import { FrownIcon, ShoppingCartIcon } from 'lucide-react';
+import { removeFromCart } from '../../slices/cartSlice';
+import axios from 'axios';
+import {toast} from "sonner";
 
 const Cart = () => {
     const user = useSelector((state) => state.user.auth);
     const cartItems = useSelector((state) => state.cart.cartItems);
+    const billing = useSelector((state) => state.billing);
     const [userState, setUserState] = useState(null);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     console.log("from Cart", user);
     useEffect(() => {
         if (user) {
             setUserState(user);
         }
     }, [user]);
+
+    //remove cart item from db
+    const removeCartItemToDB = async (item) => {
+        try {
+            console.log("fetching Data");
+            const response = await axios.delete(`/cart/${item._id}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${user.token}`
+                }
+            }
+            );
+            return response.data;
+        } catch (error) {
+            throw new Error('Failed to fetch data');
+        }
+    }
+
+    const handleCartItemRemove = (item) => {
+        console.log("Item to be removed", item);
+        dispatch(removeFromCart({id : item.product_id}));
+        toast.success("Item removed from cart")
+        removeCartItemToDB(item).then(data => {
+            console.log(data);
+        }
+        ).catch(error => {
+            console.log(error);
+        })
+    }
 
     return (
         <>
@@ -35,6 +69,25 @@ const Cart = () => {
                         >
                         Go to Login
                         </Link>
+                    </div>
+                </div>
+                :
+                cartItems.length === 0?
+                <div className="flex flex-col min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900">
+                    <div className="flex flex-col items-center justify-center space-y-6">
+                    <ShoppingCartIcon className="h-24 w-24 text-gray-500 dark:text-gray-400" />
+                    <div className="text-center">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Your cart is empty</h2>
+                        <p className="mt-2 text-gray-500 dark:text-gray-400">
+                        Looks like you haven't added anything to your cart yet. Start shopping to add items.
+                        </p>
+                    </div>
+                    <Link
+                        className="inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-200 dark:focus:ring-gray-300 dark:focus:ring-offset-gray-900"
+                        to={"/"}
+                    >
+                        Start Shopping
+                    </Link>
                     </div>
                 </div>
                 :
@@ -66,8 +119,8 @@ const Cart = () => {
                                             </div>
                                             <div className="flex justify-between items-center mt-4">
                                                 <span className="text-2xl font-bold">${item.product.price}</span>
-                                                <Button size="sm" variant="outline">
-                                                Remove
+                                                <Button size="sm" variant="outline" onClick={() => handleCartItemRemove(item)}>
+                                                    Remove
                                                 </Button>
                                             </div>
                                             </div>
@@ -83,19 +136,21 @@ const Cart = () => {
                         <h3 className="text-xl font-bold mb-4">Order Summary</h3>
                         <div className="flex justify-between items-center mb-2">
                             <span>Subtotal</span>
-                            <span className="font-bold">$519.90</span>
+                            <span className="font-bold">${billing.subtotal}</span>
                         </div>
                         <div className="flex justify-between items-center mb-2">
                             <span>Shipping</span>
-                            <span className="font-bold">$0.00</span>
+                            <span className="font-bold">${billing.shipping}</span>
                         </div>
                         <div className="flex justify-between items-center mb-4">
                             <span>Total</span>
-                            <span className="text-2xl font-bold">$519.90</span>
+                            <span className="text-2xl font-bold">${billing.total}</span>
                         </div>
-                        <Button className="w-full" size="lg">
-                            Continue to Buy
-                        </Button>
+                        <Link to="/payment">
+                            <Button className="w-full" size="lg">
+                                Continue to Buy
+                            </Button>
+                        </Link>
                         </div>
                     </div>
                     </section>

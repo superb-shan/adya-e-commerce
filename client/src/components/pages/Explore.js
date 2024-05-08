@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { CustomCarouselMultiple } from '../CustomCarousel';
-import { ArrowRight, Check, FilterIcon, FlagIcon, HomeIcon, LaptopIcon, ListOrderedIcon, PaintbrushIcon, ShirtIcon, ToyBrickIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ArrowRight, Check, FlagIcon, HomeIcon, LaptopIcon, PaintbrushIcon, ShirtIcon, ToyBrickIcon } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
-import { setInitialData } from '../../slices/exploreSlice';
 import getRandomSubset from '../../lib/array-randomizer';
 import { addToCart } from '../../slices/cartSlice';
+import {toast} from "sonner";
 
 const items = [
     {
@@ -37,11 +36,23 @@ const Explore = () => {
     const cartItems = useSelector((state) => state.cart.cartItems);
     const user = useSelector((state) => state.user.auth);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const handleAddToCart = (product) => {
-        console.log("Adding to cart", product);
-        dispatch(addToCart({product_id: product._id, quantity: 1, product}));
-        addCartItemToDB(product).then(data => console.log(data)).catch(error => console.error(error));
+        if(user){
+            console.log("Adding to cart", product);
+            dispatch(addToCart({product_id: product._id, quantity: 1, product}));
+            toast.success("Item added to cart");
+            addCartItemToDB(product).then(data => console.log(data)).catch(error => console.error(error));
+        }else{
+            toast.info("Login to use cart!",{
+                duration: 10000,
+                action: {
+                    label: 'Login',
+                    onClick: () => navigate("/login-signup"),
+                  },
+              })
+        }
     }
 
     const addCartItemToDB = async (product) => {
@@ -123,6 +134,7 @@ const Explore = () => {
                 <Link
                     className="bg-white rounded-lg shadow-md overflow-hidden hover:bg-gray-200 transition-colors"
                     href="#"
+                    onClick={() => toast.info("Categories coming soon!")}
                 >
                     <div className="p-4 flex flex-col items-center">
                     <LaptopIcon className="h-12 w-12 mb-2" />
@@ -132,6 +144,7 @@ const Explore = () => {
                 <Link
                     className="bg-white rounded-lg shadow-md overflow-hidden hover:bg-gray-200 transition-colors"
                     href="#"
+                    onClick={() => toast.info("Categories coming soon!")}
                 >
                     <div className="p-4 flex flex-col items-center">
                     <ShirtIcon className="h-12 w-12 mb-2" />
@@ -141,6 +154,7 @@ const Explore = () => {
                 <Link
                     className="bg-white rounded-lg shadow-md overflow-hidden hover:bg-gray-200 transition-colors"
                     href="#"
+                    onClick={() => toast.info("Categories coming soon!")}
                 >
                     <div className="p-4 flex flex-col items-center">
                     <HomeIcon className="h-12 w-12 mb-2" />
@@ -150,6 +164,7 @@ const Explore = () => {
                 <Link
                     className="bg-white rounded-lg shadow-md overflow-hidden hover:bg-gray-200 transition-colors"
                     href="#"
+                    onClick={() => toast.info("Categories coming soon!")}
                 >
                     <div className="p-4 flex flex-col items-center">
                     <PaintbrushIcon className="h-12 w-12 mb-2" />
@@ -159,6 +174,7 @@ const Explore = () => {
                 <Link
                     className="bg-white rounded-lg shadow-md overflow-hidden hover:bg-gray-200 transition-colors"
                     href="#"
+                    onClick={() => toast.info("Categories coming soon!")}
                 >
                     <div className="p-4 flex flex-col items-center">
                     <FlagIcon className="h-12 w-12 mb-2" />
@@ -168,6 +184,7 @@ const Explore = () => {
                 <Link
                     className="bg-white rounded-lg shadow-md overflow-hidden hover:bg-gray-200 transition-colors"
                     href="#"
+                    onClick={() => toast.info("Categories coming soon!")}
                 >
                     <div className="p-4 flex flex-col items-center">
                     <ToyBrickIcon className="h-12 w-12 mb-2" />

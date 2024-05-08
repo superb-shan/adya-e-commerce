@@ -11,15 +11,18 @@ export const cartSlice = createSlice({
       state.cartItems.push(action.payload);
     },
     removeFromCart: (state, action) => {
-      state.cartItems = state.cartItems.filter(item => item.id !== action.payload.id);
+      state.cartItems = state.cartItems.filter(item => item.product_id !== action.payload.id);
     },
     addMultipleToCart: (state, action) => {
         console.log("action.payload",action.payload);
       state.cartItems = action.payload;
     },
+    emptyCart: (state) => {
+      state.cartItems = [];
+    }
   },
 });
 
-export const { addToCart, removeFromCart, addMultipleToCart } = cartSlice.actions;
+export const { addToCart, removeFromCart, addMultipleToCart, emptyCart } = cartSlice.actions;
 
 export default cartSlice.reducer;

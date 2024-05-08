@@ -21,7 +21,6 @@ import { setAuth } from "./slices/userSlice";
 // axios.defaults.baseURL = 'https://adya-e-commerce.onrender.com/api';
 axios.defaults.baseURL = 'http://localhost:8080/api';
 
-
 function App() {
     const user = useSelector((state) => state.user.auth);
     

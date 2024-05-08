@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux';
 import { setAuth } from '../../slices/userSlice';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toast } from "sonner"
 
 const sendLoginRequest = async (email, password) => {
     try {
@@ -13,7 +14,17 @@ const sendLoginRequest = async (email, password) => {
         const response = await axios.post('/login', {email, password});
         return response.data;
     } catch (error) {
-        throw new Error('Failed to fetch data');
+        throw new Error('Failed to login user');
+    }
+}
+
+const sendSignupRequest = async (email, password, firstName, lastName) => {
+    try {
+        console.log("Signing up", email, password, firstName, lastName);
+        const response = await axios.post('/signup', {email, password, firstName, lastName});
+        return response.data;
+    } catch (error) {
+        throw new Error('Failed to signup user');
     }
 }
 
@@ -36,12 +47,32 @@ const LoginSignup = () => {
             if(data.token){
                 //store the user data in LS
                 localStorage.setItem('user', JSON.stringify(data));
-                dispatch(setAuth(data));
+                dispatch(setAuth(data))
+                toast.success("Login Successful")
                 navigate("/" + searchParams.get('redirect') || '/');
             }
         
         }).catch(error => {
             console.log(error);
+            toast.error(error.message)
+        })
+    }
+
+    const handleSignup = async (e) => {
+        e.preventDefault();
+        sendSignupRequest(email, password, firstName, lastName)
+        .then(data => {
+            console.log(data);
+            if(data.token){
+                //store the user data in LS
+                localStorage.setItem('user', JSON.stringify(data));
+                dispatch(setAuth(data));
+                toast.success("Signup Successful!")
+                navigate("/" + searchParams.get('redirect') || '/');
+            }
+        }).catch(error => {
+            console.log(error);
+            toast.error(error.message)
         })
     }
 
@@ -102,6 +133,8 @@ const LoginSignup = () => {
                                     id="name"
                                     placeholder="John Doe"
                                     type="text"
+                                    value={firstName}
+                                    onChange={(e) => setFirstName(e.target.value)}
                                     />
                                 </div>
                                 <div className='w-[calc(50%-10px)]'>
@@ -111,6 +144,8 @@ const LoginSignup = () => {
                                     id="name"
                                     placeholder="John Doe"
                                     type="text"
+                                    value={lastName}
+                                    onChange={(e) => setLastName(e.target.value)}
                                     />
                                 </div>
                             </div>
@@ -121,6 +156,8 @@ const LoginSignup = () => {
                             id="email"
                             placeholder="example@email.com"
                             type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
                         <div className="mb-4">
@@ -130,9 +167,11 @@ const LoginSignup = () => {
                             id="password"
                             placeholder="********"
                             type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
-                        <Button className="w-full bg-primary text-white hover:bg-primary/90 focus:ring-primary">
+                        <Button className="w-full bg-primary text-white hover:bg-primary/90 focus:ring-primary" onClick={handleSignup}>
                             Sign Up
                         </Button>
                         </form>

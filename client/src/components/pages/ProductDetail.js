@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AvatarImage, AvatarFallback, Avatar } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Check, CheckCheck, Heart, StarIcon } from 'lucide-react';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../../slices/cartSlice';
+import {toast} from "sonner";
 
 const getProductWithId = async (id) => {
     try {
@@ -23,11 +24,23 @@ function ProductDetail() {
     const user = useSelector((state) => state.user.auth);
     const [product, setProduct] = React.useState(null);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const handleAddToCart = (product) => {
-        console.log("Adding to cart", product);
-        dispatch(addToCart({product_id: product._id, quantity: 1, product}));
-        addCartItemToDB(product).then(data => console.log(data)).catch(error => console.error(error));
+        if(user){
+            console.log("Adding to cart", product);
+            dispatch(addToCart({product_id: product._id, quantity: 1, product}));
+            toast.success("Item added to cart");
+            addCartItemToDB(product).then(data => console.log(data)).catch(error => console.error(error));
+        }else{
+            toast.info("Login to use cart!",{
+                duration: 10000,
+                action: {
+                    label: 'Login',
+                    onClick: () => navigate("/login-signup"),
+                  },
+              })
+        }
     }
 
     const addCartItemToDB = async (product) => {

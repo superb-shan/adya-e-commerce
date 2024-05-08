@@ -4,7 +4,8 @@ const {
     getCartItems,
     deleteCartItem,
     deleteAndPutCartItems,
-    getBillingDetails
+    getBillingDetails,
+    deleteAllCartItems
 } = require('../controllers/cartController');
 const AuthMiddleware = require('../middleware/AuthMiddleware');
 
@@ -16,6 +17,9 @@ router.post('/add', addCartItem);
 
 // Get all cart items
 router.get('/all', getCartItems);
+
+//delete all
+router.delete('/all', deleteAllCartItems);
 
 // Delete a cart item
 router.delete('/:id', deleteCartItem);

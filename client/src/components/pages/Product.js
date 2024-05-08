@@ -3,10 +3,11 @@ import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem, DropdownMenuContent, DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuRadioItem, DropdownMenuRadioGroup } from "../ui/dropdown-menu"
 import { Check, FilterIcon, ListOrderedIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../../slices/cartSlice';
 import axios from 'axios';
+import { toast } from 'sonner';
 
 const Product = () => {
     const productsData = useSelector((state) => state.explore.productsData);
@@ -15,6 +16,7 @@ const Product = () => {
     const dispatch = useDispatch();
     const [sortedProducts, setSortedProducts] = useState([]);
     const [sort, setSort] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         setSortedProducts(productsData);
@@ -28,9 +30,21 @@ const Product = () => {
         }
     }
     const handleAddToCart = (product) => {
-        console.log("Adding to cart", product);
-        dispatch(addToCart({product_id: product._id, quantity: 1, product}));
-        addCartItemToDB(product).then(data => console.log(data)).catch(error => console.error(error));
+        if(user){
+            console.log("Adding to cart", product);
+            dispatch(addToCart({product_id: product._id, quantity: 1, product}));
+            toast.success("Item added to cart");
+            addCartItemToDB(product).then(data => console.log(data)).catch(error => console.error(error));
+        }
+        else{
+            toast.info("Login to use cart!",{
+                duration: 10000,
+                action: {
+                    label: 'Login',
+                    onClick: () => navigate("/login-signup"),
+                  },
+              })
+        }
     }
 
     const addCartItemToDB = async (product) => {
@@ -52,6 +66,7 @@ const Product = () => {
     useEffect(() => {
         if(sort){
             sortProducts(sort);
+            toast.success("Sorted by " + sort);
         }
     }, [sort]);
 
