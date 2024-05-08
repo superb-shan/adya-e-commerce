@@ -1,7 +1,6 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const validator = require('validator');
-const { Lasso } = require('lucide-react');
 
 const Schema = mongoose.Schema
 

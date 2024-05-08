@@ -9,10 +9,10 @@ const Cart = () => {
     const navigate = useNavigate();
     console.log("from Cart", user);
     useEffect(() => {
-        if (user === null) {
-            
+        if (user) {
+            setUserState(user);
         }
-    }, [user, navigate]);
+    }, [user]);
 
     return (
             <main className="flex-1 flex flex-col md:flex-row min-h-[calc(100%-100px)] bg-gray-100 lg:w-full">
