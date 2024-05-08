@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { CustomCarouselMultiple } from '../CustomCarousel';
-import { ArrowRight, FilterIcon, FlagIcon, HomeIcon, LaptopIcon, ListOrderedIcon, PaintbrushIcon, ShirtIcon, ToyBrickIcon } from 'lucide-react';
+import { ArrowRight, Check, FilterIcon, FlagIcon, HomeIcon, LaptopIcon, ListOrderedIcon, PaintbrushIcon, ShirtIcon, ToyBrickIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import { setInitialData } from '../../slices/exploreSlice';
 import getRandomSubset from '../../lib/array-randomizer';
+import { addToCart } from '../../slices/cartSlice';
 
 const items = [
     {
@@ -31,27 +32,33 @@ const items = [
     }
 ]
 
-const fetchProducts = async () => {
-    try {
-      console.log("fetching Data");
-      const response = await axios.get('/products');
-      return response.data;
-    } catch (error) {
-      throw new Error('Failed to fetch data');
-    }
-}
-
 const Explore = () => {
-    // const { heroSliderProducts, loading } = useSelector((state) => state.explore);
+    const productsData = useSelector((state) => state.explore.productsData);
+    const cartItems = useSelector((state) => state.cart.cartItems);
+    const user = useSelector((state) => state.user.auth);
     const dispatch = useDispatch();
-    const [productData, setProductData] = useState([]);
 
+    const handleAddToCart = (product) => {
+        console.log("Adding to cart", product);
+        dispatch(addToCart({product_id: product._id, quantity: 1, product}));
+        addCartItemToDB(product).then(data => console.log(data)).catch(error => console.error(error));
+    }
 
-    useEffect(() => {
-        // fetchProducts().then(data => {console.log(data); dispatch(setInitialData({data}))});
-        fetchProducts().then(data => {console.log(data); setProductData(data); console.log(getRandomSubset(data, 5))});
-
-      }, []);
+    const addCartItemToDB = async (product) => {
+        try {
+            console.log("fetching Data");
+            const response = await axios.post('/cart/add', {product_id: product._id, quantity: 1}, 
+            {
+                headers: {
+                    Authorization: `Bearer ${user.token}`
+                }
+            }
+            );
+            return response.data;
+        } catch (error) {
+            throw new Error('Failed to fetch data');
+        }
+    }
 
     return (
         <div className="flex flex-col bg-gradient-to-br from-[#fdaa28] to-[#de128d]">
@@ -66,34 +73,41 @@ const Explore = () => {
             <div className="container mx-auto px-4 md:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {
-                        getRandomSubset(productData,3).map((product, index) => {
+                        getRandomSubset(productsData, 3).map((product, index) => {
                             return (
                                 <div key={index}>
-                                    <Link to={`/product/${product._id}`}>
-                                        <div className="bg-white rounded-lg shadow-md overflow-hidden h-full">
-                                            <img
-                                            alt="Featured Product"
-                                            className="w-full h-48 object-cover"
-                                            height={300}
-                                            src={product.image}
-                                            style={{
-                                                aspectRatio: "400/300",
-                                                objectFit: "cover",
-                                            }}
-                                            width={400}
-                                            />
-                                            <div className="p-6 flex flex-col justify-between h-[calc(100%-192px)]">
-                                                <div>
-                                                    <h3 className="text-lg font-bold mb-2">{product.title}</h3>
-                                                    <p className="text-gray-600 mb-4" title={product.description}>{product.description.slice(0, 150) + "..."}</p>
+                                    <div className="bg-white rounded-lg shadow-md overflow-hidden h-full">
+                                        <Link to={`/product/${product._id}`}>
+                                            <div className="relative">
+                                                <img
+                                                    alt="Featured Product"
+                                                    className="w-full h-48 object-cover"
+                                                    height={300}
+                                                    src={product.image}
+                                                    style={{
+                                                        aspectRatio: "400/300",
+                                                        objectFit: "cover",
+                                                    }}
+                                                    width={400}
+                                                />
+                                                <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity duration-300">
+                                                    <p className="text-white text-lg font-bold">View Details</p>
                                                 </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-2xl font-bold">${product.price}</span>
-                                                <Button size="sm">Add to Cart</Button>
                                             </div>
+                                        </Link>
+                                        <div className="p-6 flex flex-col justify-between h-[calc(100%-192px)]">
+                                            <div>
+                                                <h3 className="text-lg font-bold mb-2">{product.title}</h3>
+                                                <p className="text-gray-600 mb-4" title={product.description}>{product.description.slice(0, 150) + "..."}</p>
                                             </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-2xl font-bold">${product.price}</span>
+                                            {
+                                                cartItems.find(item => item.product._id === product._id) ? <Button size="sm" variant="outline" disabled={true}>In Cart <Check className='ml-2 h-4 w-4' /></Button> : <Button size="sm" onClick={() => handleAddToCart(product)}>Add to Cart</Button>
+                                            }
                                         </div>
-                                    </Link>
+                                        </div>
+                                    </div>
                                 </div>
                             )
                         })
@@ -196,29 +210,38 @@ const Explore = () => {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">Products</h2>
             <div className="flex items-center space-x-4">
-                <Button variant="outline" className="flex">
-                    Show All
-                    <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
+                <Link to={"/product"}>
+                    <Button variant="outline" className="flex">
+                        Show All
+                        <ArrowRight className="h-5 w-5 ml-2" />
+                    </Button>
+                </Link>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {
-                getRandomSubset(productData, 4).map((product, index) => {
+                getRandomSubset(productsData, 4).map((product, index) => {
                     return (
                         <div key={index}>
                             <div className="bg-white rounded-lg shadow-md overflow-hidden h-full">
-                                <img
-                                alt={product.title}
-                                className="w-full h-48 object-cover"
-                                height={300}
-                                src={product.image}
-                                style={{
-                                    aspectRatio: "400/300",
-                                    objectFit: "cover",
-                                }}
-                                width={400}
-                                />
+                                <Link to={`/product/${product._id}`}>
+                                    <div className="relative">
+                                        <img
+                                            alt="Featured Product"
+                                            className="w-full h-48 object-cover"
+                                            height={300}
+                                            src={product.image}
+                                            style={{
+                                                aspectRatio: "400/300",
+                                                objectFit: "cover",
+                                            }}
+                                            width={400}
+                                        />
+                                        <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity duration-300">
+                                            <p className="text-white text-lg font-bold">View Details</p>
+                                        </div>
+                                    </div>
+                                </Link>
                                 <div className="p-6 flex flex-col justify-between h-[calc(100%-192px)]">
                                     <div>
                                         <h3 className="text-lg font-bold mb-2">{product.title}</h3>
@@ -226,7 +249,9 @@ const Explore = () => {
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="text-2xl font-bold">${product.price}</span>
-                                        <Button size="sm">Add to Cart</Button>
+                                        {
+                                            cartItems.find(item => item.product._id === product._id) ? <Button size="sm" variant="outline" disabled={true}>In Cart <Check className='ml-2 h-4 w-4' /> </Button> : <Button size="sm" onClick={() => handleAddToCart(product)}>Add to Cart</Button>
+                                        }
                                     </div>
                                 </div>
                             </div>

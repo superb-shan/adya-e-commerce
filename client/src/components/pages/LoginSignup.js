@@ -5,6 +5,17 @@ import { Button } from '../ui/button';
 import { useDispatch } from 'react-redux';
 import { setAuth } from '../../slices/userSlice';
 import axios from 'axios';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+
+const sendLoginRequest = async (email, password) => {
+    try {
+        console.log("fetching Data");
+        const response = await axios.post('/login', {email, password});
+        return response.data;
+    } catch (error) {
+        throw new Error('Failed to fetch data');
+    }
+}
 
 const LoginSignup = () => {
     const [isLogin, setIsLogin] = useState(true);
@@ -13,17 +24,25 @@ const LoginSignup = () => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+    console.log(searchParams.get('redirect'));
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        const response = await axios.post('/login', {email, password});
-        const data = response.data;
-        console.log(data);
-        if(data.token){
-            //store the user data in LS
-            localStorage.setItem('user', JSON.stringify(data));
-            dispatch(setAuth(data));
-        }
+        sendLoginRequest(email, password)
+        .then(data => {
+            console.log(data);
+            if(data.token){
+                //store the user data in LS
+                localStorage.setItem('user', JSON.stringify(data));
+                dispatch(setAuth(data));
+                navigate("/" + searchParams.get('redirect') || '/');
+            }
+        
+        }).catch(error => {
+            console.log(error);
+        })
     }
 
     return (

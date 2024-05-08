@@ -53,8 +53,47 @@ const deleteCartItem = async (req, res) => {
     }
 };
 
+//delete existing cart items and put an array of cart items
+const deleteAndPutCartItems = async (req, res) => {
+    const cartItems = req.body;
+    try {
+        await Cart.deleteMany({});
+        const newCartItems = await Cart.insertMany(cartItems);
+        res.json(newCartItems);
+    } catch (error) {
+        res.status(500).json({ error });
+    }
+};
+
+//get total price of cart items
+const getBillingDetails = async (req, res) => {
+    try {
+        const cartItems = await Cart.find({
+            user_id: req.user._id
+        });
+
+        let subPrice = 0;
+        for (const item of cartItems) {
+            const product = await Product
+                .findById(item.product_id);
+            subPrice += product.price * item.quantity;
+        }
+
+        //determine a random shipping amount
+        const shippingPrice = Math.floor(Math.random() * 100);
+
+        const totalPrice = subPrice + shipping;
+
+        res.json({ subPrice, shippingPrice, totalPrice });
+    } catch (error) {
+        res.status(500).json({ error });
+    }
+};
+
 module.exports = {
     addCartItem,
     getCartItems,
-    deleteCartItem
+    deleteCartItem,
+    deleteAndPutCartItems,
+    getBillingDetails
 };

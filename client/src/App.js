@@ -18,7 +18,8 @@ import LoginSignup from "./components/pages/LoginSignup";
 import { useDispatch, useSelector } from "react-redux";
 import { setAuth } from "./slices/userSlice";
 
-axios.defaults.baseURL = 'https://adya-e-commerce.onrender.com/api';
+// axios.defaults.baseURL = 'https://adya-e-commerce.onrender.com/api';
+axios.defaults.baseURL = 'http://localhost:8080/api';
 
 
 function App() {

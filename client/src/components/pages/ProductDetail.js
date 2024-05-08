@@ -2,8 +2,10 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { AvatarImage, AvatarFallback, Avatar } from "../ui/avatar";
 import { Button } from "../ui/button";
-import { Heart, StarIcon } from 'lucide-react';
+import { Check, CheckCheck, Heart, StarIcon } from 'lucide-react';
 import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToCart } from '../../slices/cartSlice';
 
 const getProductWithId = async (id) => {
     try {
@@ -17,9 +19,33 @@ const getProductWithId = async (id) => {
 
 function ProductDetail() {
     const { id } = useParams();
-
-    // Fetch product data using the id (replace with your actual data fetching)
+    const cartItems = useSelector((state) => state.cart.cartItems);
+    const user = useSelector((state) => state.user.auth);
     const [product, setProduct] = React.useState(null);
+    const dispatch = useDispatch();
+
+    const handleAddToCart = (product) => {
+        console.log("Adding to cart", product);
+        dispatch(addToCart({product_id: product._id, quantity: 1, product}));
+        addCartItemToDB(product).then(data => console.log(data)).catch(error => console.error(error));
+    }
+
+    const addCartItemToDB = async (product) => {
+        try {
+            console.log("fetching Data");
+            const response = await axios.post('/cart/add', {product_id: product._id, quantity: 1}, 
+            {
+                headers: {
+                    Authorization: `Bearer ${user.token}`
+                }
+            }
+            );
+            return response.data;
+        } catch (error) {
+            throw new Error('Failed to fetch data');
+        }
+    }
+
     useEffect(() => {
         //get product with id using axios
         getProductWithId(id).then((data) => {
@@ -116,7 +142,9 @@ function ProductDetail() {
                                 <div className="flex items-center justify-between">
                                     <span className="text-3xl font-bold">${product.price}</span>
                                     <div className="flex items-center space-x-4">
-                                    <Button size="lg">Add to Cart</Button>
+                                        {
+                                            cartItems.find(item => item.product._id === product._id) ? <Button size="sm" variant="outline" disabled={true}>In Cart <Check className='ml-2 h-4 w-4' /> </Button> : <Button size="sm" onClick={() => handleAddToCart(product)}>Add to Cart</Button>
+                                        }
                                     </div>
                                 </div>
                             </div>

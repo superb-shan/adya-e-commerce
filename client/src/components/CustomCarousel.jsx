@@ -69,34 +69,36 @@ export function CustomCarouselMultiple({items}) {
         autoplay: true,
     };
     return (
-        <div className="slider-container py-5 pb-7">
+        <div className="slider-container py-5 pb-7 h-full">
             {
-                items.map((item, index) => (
-                    <div></div>
-                ))
+                // items.map((item, index) => (
+                //     <div></div>
+                // ))
             }
         <Slider {...settings}>
-            {items.map((item, index) => (
-                <div className="px-1">
+            {items.map((product, index) => (
+                <div className="px-1 h-full">
                     <div className="bg-white rounded-lg shadow-md overflow-hidden mr-4 h-full">
                         <img
                             alt="Featured Product"
                             className="w-full h-48 object-cover"
                             height={300}
-                            src="/placeholder.svg"
+                            src={product.image}
                             style={{
                                 aspectRatio: "400/300",
                                 objectFit: "cover",
                             }}
                             width={400}
                         />
-                        <div className="p-6">
-                        <h3 className="text-lg font-bold mb-2">{item.title}</h3>
-                        <p className="text-gray-600 mb-4">{item.description}</p>
-                        <div className="flex justify-between items-center">
-                            <span className="text-2xl font-bold">${item.price}</span>
-                            <Button size="sm">Add to Cart</Button>
-                        </div>
+                        <div className="p-6 flex flex-col justify-between h-[calc(100%-192px)]">
+                            <div>
+                                <h3 className="text-lg font-bold mb-2">{product.title}</h3>
+                                <p className="text-gray-600 mb-4" title={product.description}>{product.description.slice(0, 150) + "..."}</p>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-2xl font-bold">${product.price}</span>
+                                <Button size="sm">Add to Cart</Button>
+                            </div>
                         </div>
                     </div>
                 </div>

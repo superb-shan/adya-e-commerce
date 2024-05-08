@@ -1,11 +1,60 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem, DropdownMenuContent, DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuRadioItem, DropdownMenuRadioGroup } from "../ui/dropdown-menu"
-import { FilterIcon, ListOrderedIcon } from 'lucide-react';
+import { Check, FilterIcon, ListOrderedIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToCart } from '../../slices/cartSlice';
+import axios from 'axios';
 
 const Product = () => {
+    const productsData = useSelector((state) => state.explore.productsData);
+    const cartItems = useSelector((state) => state.cart.cartItems);
+    const user = useSelector((state) => state.user.auth);
+    const dispatch = useDispatch();
+    const [sortedProducts, setSortedProducts] = useState([]);
+    const [sort, setSort] = useState(null);
+
+    useEffect(() => {
+        setSortedProducts(productsData);
+    }, [productsData]);
+
+    const sortProducts = (value) => {
+        if(value === 'price-asc'){
+            setSortedProducts([...sortedProducts].sort((a, b) => a.price - b.price));
+        } else if(value === 'price-desc'){
+            setSortedProducts([...sortedProducts].sort((a, b) => b.price - a.price));
+        }
+    }
+    const handleAddToCart = (product) => {
+        console.log("Adding to cart", product);
+        dispatch(addToCart({product_id: product._id, quantity: 1, product}));
+        addCartItemToDB(product).then(data => console.log(data)).catch(error => console.error(error));
+    }
+
+    const addCartItemToDB = async (product) => {
+        try {
+            console.log("fetching Data");
+            const response = await axios.post('/cart/add', {product_id: product._id, quantity: 1}, 
+            {
+                headers: {
+                    Authorization: `Bearer ${user.token}`
+                }
+            }
+            );
+            return response.data;
+        } catch (error) {
+            throw new Error('Failed to fetch data');
+        }
+    }
+
+    useEffect(() => {
+        if(sort){
+            sortProducts(sort);
+        }
+    }, [sort]);
+
     return (
         <div>
             <section className="bg-gray-100 py-12 md:py-16">
@@ -16,34 +65,6 @@ const Product = () => {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                             <Button variant="outline">
-                                <FilterIcon className="h-5 w-5 mr-2" />
-                                Filters
-                            </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuCheckboxItem className="flex items-start gap-[10px] pl-2" >
-                                <Checkbox />
-                                Price: Low to High
-                            </DropdownMenuCheckboxItem>
-                            <DropdownMenuCheckboxItem className="flex items-start gap-[10px] pl-2" >
-                                <Checkbox />
-                                Price: High to Low
-                            </DropdownMenuCheckboxItem>
-                            <DropdownMenuCheckboxItem className="flex items-start gap-[10px] pl-2" >
-                                <Checkbox />
-                                Newest
-                            </DropdownMenuCheckboxItem>
-                            <DropdownMenuCheckboxItem className="flex items-start gap-[10px] pl-2" >
-                                <Checkbox />
-                                Bestsellers
-                            </DropdownMenuCheckboxItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                            <Button variant="outline">
                                 <ListOrderedIcon className="h-5 w-5 mr-2" />
                                 Sort
                             </Button>
@@ -51,9 +72,7 @@ const Product = () => {
                             <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Sort by</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuRadioGroup value="featured">
-                                <DropdownMenuRadioItem value="featured">Featured</DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="newest">Newest</DropdownMenuRadioItem>
+                            <DropdownMenuRadioGroup value={sort} onValueChange={setSort}>
                                 <DropdownMenuRadioItem value="price-asc">Price: Low to High</DropdownMenuRadioItem>
                                 <DropdownMenuRadioItem value="price-desc">Price: High to Low</DropdownMenuRadioItem>
                             </DropdownMenuRadioGroup>
@@ -62,29 +81,42 @@ const Product = () => {
                     </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                        <Link to={"#"}>
-                        <img
-                            alt="Product 1"
-                            className="w-full h-48 object-cover"
-                            height={300}
-                            src="/placeholder.svg"
-                            style={{
-                            aspectRatio: "400/300",
-                            objectFit: "cover",
-                            }}
-                            width={400}
-                        />
-                        <div className="p-4">
-                            <h3 className="text-lg font-bold mb-2">Product 1</h3>
-                            <p className="text-gray-600 mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                            <div className="flex justify-between items-center">
-                            <span className="text-2xl font-bold">$49.99</span>
-                            <Button size="sm">Add to Cart</Button>
-                            </div>
-                        </div>
-                        </Link>
-                    </div>                    
+                        {
+                            sortedProducts.map((product, index) => (
+                                <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                                    <Link to={`/product/${product._id}`}>
+                                        <div className="relative">
+                                            <img
+                                                alt="Featured Product"
+                                                className="w-full h-48 object-cover"
+                                                height={300}
+                                                src={product.image}
+                                                style={{
+                                                    aspectRatio: "400/300",
+                                                    objectFit: "cover",
+                                                }}
+                                                width={400}
+                                            />
+                                            <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity duration-300">
+                                                <p className="text-white text-lg font-bold">View Details</p>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                    <div className="p-4 flex flex-col justify-between h-[calc(100%-192px)]">
+                                        <div>
+                                            <h3 className="text-lg font-bold mb-2">{product.title}</h3>
+                                            <p className="text-gray-600 mb-4" title={product.description}>{product.description.slice(0, 150) + "..."}</p>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-2xl font-bold">${product.price}</span>
+                                            {
+                                                cartItems.find(item => item.product._id === product._id) ? <Button size="sm" variant="outline" disabled={true}>In Cart <Check className='ml-2 h-4 w-4' /> </Button> : <Button size="sm" onClick={() => handleAddToCart(product)}>Add to Cart</Button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>  
+                            ))
+                        }
                     </div>
                 </div>
             </section>
