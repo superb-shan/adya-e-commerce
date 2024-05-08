@@ -1,4 +1,4 @@
-import { SearchIcon, ShoppingCartIcon } from "lucide-react";
+import { LogIn, SearchIcon, ShoppingCartIcon, StoreIcon } from "lucide-react";
 import { Link, Outlet } from "react-router-dom";
 import {
     DropdownMenu,
@@ -9,6 +9,7 @@ import {
     DropdownMenuTrigger,
   } from "../components/ui/dropdown-menu"
   import { AvatarImage, AvatarFallback, Avatar } from "../components/ui/avatar"
+import { Button } from "../components/ui/button";
   
 
 export default function RootLayout() {
@@ -16,8 +17,9 @@ export default function RootLayout() {
         <div className="w-screen h-screen overflow-x-hidden">
             <header className="bg-gray-900 text-white py-4 px-6 md:px-8 flex items-center justify-between">
                 <div className="flex items-center">
-                <Link className="text-xl font-bold mr-6" href="#">
-                    Acme Store
+                <Link className="text-xl font-bold mr-6 flex gap-[10px]" href="#">
+                    <StoreIcon className="!h-14 !w-14" />
+                    Adya Store
                 </Link>
                 <div className="relative w-full max-w-md">
                     <input
@@ -33,25 +35,16 @@ export default function RootLayout() {
                     <ShoppingCartIcon className="h-6 w-6" />
                     <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs">3</span>
                 </Link>
+                <Button variant="outline" className="text-gray-900 bg-gradient-to-r from-yellow-500 to-orange-500 border-0 font-bold p-0 px-2 h-9 flex justify-center items-center gap-[5px] leading-[0]">Login <LogIn className="h-4 w-4" /> </Button>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                     <button className="flex items-center space-x-2">
-                        <Avatar className="h-8 w-8">
-                        <AvatarImage alt="User Avatar" src="/placeholder-avatar.jpg" />
-                        <AvatarFallback>JP</AvatarFallback>
-                        </Avatar>
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500" />
                         <span>John Doe</span>
                     </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                        <Link href="#">Profile</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                        <Link href="#">Orders</Link>
-                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
                         <Link href="#">Logout</Link>

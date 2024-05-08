@@ -70,10 +70,15 @@ export function CustomCarouselMultiple({items}) {
     };
     return (
         <div className="slider-container py-5 pb-7">
+            {
+                items.map((item, index) => (
+                    <div></div>
+                ))
+            }
         <Slider {...settings}>
             {items.map((item, index) => (
                 <div className="px-1">
-                    <div className="bg-white rounded-lg shadow-md overflow-hidden mr-4">
+                    <div className="bg-white rounded-lg shadow-md overflow-hidden mr-4 h-full">
                         <img
                             alt="Featured Product"
                             className="w-full h-48 object-cover"
@@ -86,7 +91,7 @@ export function CustomCarouselMultiple({items}) {
                             width={400}
                         />
                         <div className="p-6">
-                        <h3 className="text-lg font-bold mb-2">{item.name}</h3>
+                        <h3 className="text-lg font-bold mb-2">{item.title}</h3>
                         <p className="text-gray-600 mb-4">{item.description}</p>
                         <div className="flex justify-between items-center">
                             <span className="text-2xl font-bold">${item.price}</span>

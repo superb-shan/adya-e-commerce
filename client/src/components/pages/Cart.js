@@ -1,7 +1,19 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button } from '../ui/button';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 const Cart = () => {
+    const user = useSelector((state) => state.user.auth);
+    const [userState, setUserState] = useState(null);
+    const navigate = useNavigate();
+    console.log("from Cart", user);
+    useEffect(() => {
+        if (user === null) {
+            
+        }
+    }, [user, navigate]);
+
     return (
             <main className="flex-1 flex flex-col md:flex-row min-h-[calc(100%-100px)] bg-gray-100 lg:w-full">
             <section className="bg-gray-100 py-12 md:py-16 md:flex-1 md:max-h-[80vh] md:overflow-y-auto lg:w-4/6">

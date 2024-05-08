@@ -2,7 +2,18 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { AvatarImage, AvatarFallback, Avatar } from "../ui/avatar";
 import { Button } from "../ui/button";
-import { StarIcon } from 'lucide-react';
+import { Heart, StarIcon } from 'lucide-react';
+import axios from 'axios';
+
+const getProductWithId = async (id) => {
+    try {
+      console.log("fetching Data");
+      const response = await axios.get(`/products/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error('Failed to fetch data');
+    }
+}
 
 function ProductDetail() {
     const { id } = useParams();
@@ -10,17 +21,18 @@ function ProductDetail() {
     // Fetch product data using the id (replace with your actual data fetching)
     const [product, setProduct] = React.useState(null);
     useEffect(() => {
-        // Simulate API call here
-        // const fetchProduct = async () => {
-        //   const response = await fetch(`http://localhost:3000/api/products/${id}`);
-        //   const productData = await response.json();
-        //   setProduct(productData);
-        // };
-        // fetchProduct();
+        //get product with id using axios
+        getProductWithId(id).then((data) => {
+            setProduct(data);
+        }
+        ).catch((error) => {
+            console.error(error);
+        }
+        );
     }, [id]);
 
     // Render product details (replace with your data display logic)
-    if (!product) {
+    if (product) {
         return (
             <div>
                 <div className="bg-gray-100 py-12 md:py-16">
@@ -29,15 +41,16 @@ function ProductDetail() {
                         <img
                             alt="Product Image"
                             className="w-full rounded-lg shadow-md"
+                            src={product.image}
                             height={600}
-                            src="/placeholder.svg"
                             style={{
-                            aspectRatio: "600/600",
-                            objectFit: "cover",
+                                objectFit: "cover",
+                                objectPosition: "center",
+                                aspectRatio: "600/600",
                             }}
                             width={600}
                         />
-                        <div className="mt-4 grid grid-cols-4 gap-4">
+                        {/* <div className="mt-4 grid grid-cols-4 gap-4">
                             <button className="border rounded-lg overflow-hidden">
                             <img
                                 alt="Product Thumbnail"
@@ -90,26 +103,24 @@ function ProductDetail() {
                                 width={100}
                             />
                             </button>
+                        </div> */}
                         </div>
-                        </div>
-                        <div className="space-y-6">
-                        <div>
-                            <h1 className="text-3xl font-bold">Product Name</h1>
-                            <p className="text-gray-600 mt-2">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl nec ultricies lacinia, nisl
-                            nisl aliquam nisl, eget aliquam nisl nisl sit amet nisl.
-                            </p>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-3xl font-bold">$49.99</span>
-                            <div className="flex items-center space-x-4">
-                            <Button size="lg">Add to Cart</Button>
-                            <Button size="lg" variant="primary">
-                                Buy Now
-                            </Button>
+                        <div className="space-y-6 h-[80%] flex flex-col justify-between">
+                            <div className='flex flex-col gap-14'>
+                                <div className='flex flex-col gap-5'>
+                                    <h1 className="text-3xl font-bold">{product.title}</h1>
+                                    <p className="text-gray-600 mt-2">
+                                    {product.description}
+                                    </p>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-3xl font-bold">${product.price}</span>
+                                    <div className="flex items-center space-x-4">
+                                    <Button size="lg">Add to Cart</Button>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div>
+                        {/* <div>
                             <h2 className="text-2xl font-bold mb-4">Product Details</h2>
                             <ul className="space-y-2 text-gray-600">
                             <li>
@@ -129,9 +140,15 @@ function ProductDetail() {
                                 Free Shipping{"\n                        "}
                             </li>
                             </ul>
-                        </div>
-                        <div>
-                            <h2 className="text-2xl font-bold mb-4">Reviews</h2>
+                        </div> */}
+                        <div className=''>
+                            <div className='flex justify-between items-center'>
+                                <h2 className="text-2xl font-bold mb-4">Reviews</h2>
+                                <div className='flex gap-[5px]'>
+                                    <Heart fill='rgb(239 68 68)' className="h-6 w-6 text-red-500" />
+                                    <span className="text-gray-600">{product?.rating.count}</span>
+                                </div>
+                            </div>
                             <div className="space-y-4">
                             <div className="flex items-start space-x-4">
                                 <Avatar className="h-10 w-10">
